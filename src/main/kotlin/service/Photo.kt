@@ -19,7 +19,7 @@ class Photo(private val db: Database, private val user: Int?) {
     }
 
     suspend fun getList(albumId: String): List<Photo> {
-        return db.query("SELECT uuid, url FROM photos WHERE user_id = ? AND album_id = ? AND url != '' ", user ?: 0, UUID.fromString(albumId)) { ps ->
+        return db.query("SELECT uuid, url FROM photos WHERE user_id = ? AND album_id = ? AND url != '' ORDER BY created_at DESC", user ?: 0, UUID.fromString(albumId)) { ps ->
             ps.executeQuery().use { rs ->
                 val albums = mutableListOf<Photo>()
                 while (rs.next()) {
