@@ -57,4 +57,10 @@ class Photo(private val db: Database, private val user: Int?) {
             UUID.fromString(uuid), user ?: 0
         ) {}
     }
+
+    suspend fun existUrl(url: String): Boolean {
+        return db.query("SELECT 1 FROM photos WHERE user_id = ? AND url = ?", user ?: 0, url) { ps ->
+            ps.executeQuery().use { rs ->  rs.next()}
+        }
+    }
 }

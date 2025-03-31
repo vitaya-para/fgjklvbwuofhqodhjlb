@@ -38,11 +38,17 @@ fun Route.photos(db: Database) {
 
                 get {
                     val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
+                    val userId = call.principal<JWTPrincipal>()?.payload?.getClaim("id")?.asInt()
                     val baseUrl = environment.config.propertyOrNull("ktor.application.baseUrl")?.getString() ?: "http://localhost:8080"
-                    val fileService = FileService(baseUrl)
-                    val file = fileService.get(id)
 
-                    if (file != null) {
+                    val fileService = FileService(baseUrl)
+                    val albumService = Album(db, userId)
+                    val photoService = Photo(db, userId)
+
+                    val file = fileService.get(id)
+                    val url = "$baseUrl/photos/$id"
+
+                    if (file != null && (albumService.existUrl(url) || photoService.existUrl(url))) {
                         call.respondFile(file)
                     } else {
                         call.respond(HttpStatusCode.NotFound, "File not found")
